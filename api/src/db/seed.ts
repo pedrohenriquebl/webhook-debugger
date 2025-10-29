@@ -24,6 +24,35 @@ function randomStripeEvent() {
   return faker.helpers.arrayElement(events);
 }
 
+function randomCreatedAt(): Date {
+  // distribution: some today, many within last week, some 8-14 days ago, some older
+  const pick = faker.number.int({ min: 0, max: 99 });
+  let daysAgo = 0;
+
+  if (pick < 30) {
+    // 30% -> today (0-1 days)
+    daysAgo = faker.number.int({ min: 0, max: 0 });
+  } else if (pick < 70) {
+    // 40% -> within last 7 days
+    daysAgo = faker.number.int({ min: 1, max: 6 });
+  } else if (pick < 90) {
+    // 20% -> 8-14 days ago
+    daysAgo = faker.number.int({ min: 8, max: 14 });
+  } else {
+    // 10% -> older (15-60 days)
+    daysAgo = faker.number.int({ min: 15, max: 60 });
+  }
+
+  // also randomize hours/minutes within the day
+  const hours = faker.number.int({ min: 0, max: 23 });
+  const minutes = faker.number.int({ min: 0, max: 59 });
+
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+}
+
 async function runSeed() {
   const samples: any[] = [];
 
@@ -31,9 +60,11 @@ async function runSeed() {
   for (let i = 0; i < 4; i++) {
     const type = randomStripeEvent();
     const rowId = uuidv7();
+    const createdAt = randomCreatedAt();
     const bodyObj = {
       id: rowId,
       type,
+      created: Math.floor(createdAt.getTime() / 1000),
       data: {
         object: {
           id: `obj_${faker.string.nanoid(8)}`,
@@ -60,6 +91,7 @@ async function runSeed() {
         "stripe-signature": faker.string.nanoid(40),
       },
       body,
+      createdAt,
     });
   }
 
@@ -70,12 +102,11 @@ async function runSeed() {
 
     const amount = faker.number.int({ min: 50, max: 500000 });
     const rowId = uuidv7();
+    const createdAt = randomCreatedAt();
     const bodyObj: Record<string, any> = {
       id: rowId,
       type,
-      created:
-        Math.floor(Date.now() / 1000) -
-        faker.number.int({ min: 0, max: 60 * 60 * 24 * 30 }),
+      created: Math.floor(createdAt.getTime() / 1000),
       data: {
         object: {
           id: `pi_${faker.string.nanoid(10)}`,
@@ -112,6 +143,7 @@ async function runSeed() {
         "stripe-signature": faker.string.nanoid(48),
       },
       body,
+      createdAt,
     });
   }
 
