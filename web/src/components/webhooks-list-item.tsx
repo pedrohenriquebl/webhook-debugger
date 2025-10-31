@@ -4,7 +4,6 @@ import { Trash2Icon } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { formatDistanceToNow } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 interface WebhooksListItemProps {
     webhook: {
         id: string;
@@ -12,9 +11,11 @@ interface WebhooksListItemProps {
         pathname: string;
         createdAt: Date;
     }
+    onWebhookCheck: (webhookId: string) => void;
+    isWebhookChecked?: boolean;
 }
 
-export function WebhooksListItem({ webhook }: WebhooksListItemProps) {
+export function WebhooksListItem({ webhook, onWebhookCheck, isWebhookChecked }: WebhooksListItemProps) {
     const queryClient = useQueryClient();
     const { mutate: deleteWebhook } = useMutation({
         mutationFn: async (id: string) => {
@@ -32,7 +33,10 @@ export function WebhooksListItem({ webhook }: WebhooksListItemProps) {
     return (
         <div className="group rounded-lg transition-colors duration-150 hover:bg-zinc-700/30">
             <div className="flex items-start gap-3 px-4 py-2.5">
-                <Checkbox />
+                <Checkbox
+                    onCheckedChange={() => onWebhookCheck(webhook.id)}
+                    checked={isWebhookChecked}
+                />
 
                 <Link to="/webhooks/$id" params={{ id: webhook.id }} className="flex flex-1 min-w-0 items-start gap-3">
                     <span className="w-12 shrink-0 font-mono text-xs font-semibold text-right text-zinc-300">
