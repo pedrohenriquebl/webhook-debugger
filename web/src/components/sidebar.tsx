@@ -1,6 +1,7 @@
 import { IconButton } from "./ui/icon-button";
 import { CopyIcon } from "lucide-react"
 import { WebhookList } from "./webhooks-list";
+import { Suspense } from "react";
 
 export function Sidebar() {
     return (
@@ -21,7 +22,9 @@ export function Sidebar() {
                 />
             </div>
 
-            <WebhookList />
+            <Suspense fallback={<div className="flex-1 flex items-center justify-center text-zinc-500">Loading...</div>}>
+                <WebhookList />
+            </Suspense>
         </div>
     )
 }
